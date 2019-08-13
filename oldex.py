@@ -27,7 +27,7 @@ class testable(db.Model):
         return '<Name %>' % self.firstName
 
 class shytable(db.Model):
-    id = db.Column('ShyID', db.Integer, primary_key = True, ForeignKey(testable.id))
+    id = db.Column('ShyID', db.Integer, db.ForeignKey(testable.id), primary_key = True)
     def __init__(self,id):
         self.id = id
 

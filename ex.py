@@ -3,22 +3,17 @@ from flask_mongoengine import MongoEngine
 from mongoengine import *
 
 app = Flask(__name__)
-app.config['MONGODB_DB'] = 'test'
+app.config['MONGODB_DB'] = 'client_db'
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = 27017
-app.config['MONGODB_USERNAME'] = 'root'
-app.config['MONGODB_PASSWORD'] = 'root'
+app.config['MONGODB_USERNAME'] = 'admin'
+app.config['MONGODB_PASSWORD'] = 'admin@123'
 
 db = MongoEngine(app)
-class Dogs(Document):
+class Dogs(db.Document):
     __collection__ = 'dogs'
-    id = IntField()
     name = StringField()
     age = IntField()
-    meta = {
-        'db_alias': 'root',
-        'collection': 'dogs'
-    }
     def __repr__(self):
         return '<DOGGY> %' % self.name
 
@@ -30,10 +25,9 @@ class Dogs(Document):
 
 @app.route('/createMongoDB/', methods = ['POST', 'GET'])
 def createMongoDB():
-    db.register_connection(alias = 'root', name = 'test')
-    db.register([Dogs])
-    newDog = Dogs(id = 0, name = "Zero", age = 0)
+    newDog = Dogs(name = "Zero", age = 0)
     newDog.save()
+    return "True"
 
 @app.route('/findDog', methods = ['POST', 'GET'])
 def findDog():
