@@ -1,37 +1,61 @@
-from flask import Flask
+from flask import Flask, request
 from flask_mongoengine import MongoEngine
 from mongoengine import *
 
 app = Flask(__name__)
-app.config['MONGODB_DB'] = 'client_db'
+app.config['MONGODB_DB'] = 'admin'
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = 27017
-app.config['MONGODB_USERNAME'] = 'admin'
-app.config['MONGODB_PASSWORD'] = 'admin@123'
+app.config['MONGODB_USERNAME'] = 'dad'
+app.config['MONGODB_PASSWORD'] = 'root'
 
 db = MongoEngine(app)
+
 class Dogs(db.Document):
     __collection__ = 'dogs'
     name = StringField()
     age = IntField()
+
     def __repr__(self):
         return '<DOGGY> %' % self.name
 
-    # def __init__(self, id, name, age):
-    #     self.id = id
-    #     self.name = name
-    #     self.age = age
-    #     return "wuf"
+@app.route('/', methods = ['POST', 'GET'])
+def wow():
+    return "Hello Beess"
 
-@app.route('/createMongoDB/', methods = ['POST', 'GET'])
-def createMongoDB():
-    newDog = Dogs(name = "Zero", age = 0)
+@app.route('/addDog/', methods = ['POST', 'GET'])
+def addDog():
+    dAge = request.values.get("dAge", type = int, default = 0)
+    dName = request.values.get("dName", type = str, default = None)
+    newDog = Dogs(name = dName, age = dAge)
     newDog.save()
-    return "True"
+    return "Dog Added"
 
-@app.route('/findDog', methods = ['POST', 'GET'])
+@app.route('/modDog/', methods = ['POST', 'GET'])
+def modDog():
+    dName = request.values.get("dName", type=str, default=None)
+    modName = request.values.get("newName", type=str, default = None)
+    newDog = Dogs.objects(name = dName).modify(set__name = modName, new = True)
+    return newDog.name
+
+@app.route('/killDog/', methods = ['POST', 'GET'])
+def killDog():
+    dName = request.values.get("dName", type=str, default=None)
+    newDog = Dogs.objects(name = dName)
+    killed = newDog.delete()
+    return str(killed)
+
+@app.route('/findDog/', methods = ['POST', 'GET'])
 def findDog():
-    dId = request.values.get("dogID", type=int, default=None)
-    firstDog = db.Dogs.objects.first_or_404(id = dId)
+    dName = request.values.get("dName", type=str, default=None)
+    firstDog = Dogs.objects(name = dName).first()
+    if firstDog == None:
+        return "Lost Dog"
+    return str(firstDog.age)
+
+@app.route('/fullKennel/', methods = ['POST', 'GET'])
+def kennel():
+    return
+
 if __name__ == '__main__':
    app.run(debug = True)
